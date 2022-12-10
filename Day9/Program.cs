@@ -12,10 +12,25 @@ namespace Day9
 
     record RopeMovement(RopeMovementDirection Direction, int Steps);
 
-    class Position
+    class Position : IEquatable<Position>
     {
         public int Row { get; set; }
         public int Column { get; set; }
+
+        public bool Equals(Position? other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+  
+            return Row == other.Row && Column == other.Column;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Row, Column);
+        }
 
         public override string ToString()
         {
@@ -29,12 +44,15 @@ namespace Day9
         public Position Head { get; private set; } = new Position();
         public Position Tail { get; private set; } = new Position();
 
-        private readonly List<Position> _visitedPositions = new();
+        private readonly HashSet<Position> _visitedPositions = new();
         public int VisitePositions => _visitedPositions.Count;
 
-        public RopeKnot(int id)
+        private bool _trackVisitedPositions;
+
+        public RopeKnot(int id, bool trackVisitedPositions = false)
         {
             Id = id;
+            _trackVisitedPositions = trackVisitedPositions;
 
             // The initial position must be visited
             MoveTail();
@@ -68,6 +86,12 @@ namespace Day9
 
         public void MoveHeadByPosition(int row, int column)
         {
+            // Don't move the tail if the head is not moved
+            if(row == Head.Row && column == Head.Column)
+            {
+                return;
+            }
+
             Head.Row = row;
             Head.Column = column;
             MoveTail();
@@ -146,8 +170,13 @@ namespace Day9
 
         private void VisitPosition(Position position)
         {
+            if (!_trackVisitedPositions)
+            {
+                return;
+            }
+
             // Mark only unvisited positions
-            if (!_visitedPositions.Any(a => a.Row == position.Row && a.Column == position.Column))
+            //if (!_visitedPositions.Any(a => a.Row == position.Row && a.Column == position.Column))
             {
                 _visitedPositions.Add(new Position { Row = position.Row, Column = position.Column });
             }
@@ -193,10 +222,13 @@ namespace Day9
             List<RopeKnot> knots = new();
 
             // Create all the knots
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 9; i++)
             {
                 knots.Add(new RopeKnot(i));
             }
+
+            // Only track the visited position of the last knot
+            knots.Add(new RopeKnot(9, true));
 
             for (int movementIndex = 0; movementIndex < ropeMovements.Count; movementIndex++)
             {
