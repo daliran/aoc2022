@@ -356,8 +356,6 @@
                 }
             }
 
-
-
             // Sort the points
             points.Sort();
 
@@ -385,7 +383,7 @@
         static void Main(string[] args)
         {
             // Since it draws everything, 150 is the minium margin for the full input to be displayed properly
-            var cavePoints = ParseInput(true, 50);
+            var cavePoints = ParseInput(true, 150);
             var simulation = new Simulation(cavePoints);
             simulation.StartSimulation(false);
 
